@@ -1,0 +1,25 @@
+version: 2
+env:
+  - GO111MODULE=on
+before:
+  hooks:
+    - go mod tidy
+builds:
+- env:
+  - CGO_ENABLED=0
+  goos:
+    - linux
+  goarch:
+    - amd64
+dockers:
+  - image_templates:
+    - "zot.soh.re/bizbuy:{{ .Tag }}"
+
+checksum:
+  name_template: 'checksums.txt'
+changelog:
+  sort: asc
+  filters:
+    exclude:
+    - '^docs:'
+    - '^test:'

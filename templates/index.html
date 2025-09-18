@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Business Loan Calculator</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: #f7f9fa;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 500px;
+            margin: 40px auto;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+            padding: 32px 28px 24px 28px;
+        }
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 24px;
+        }
+        form label {
+            display: block;
+            margin-bottom: 16px;
+            color: #34495e;
+        }
+        input[type="number"] {
+            padding: 8px;
+            border-radius: 6px;
+            border: 1px solid #d0d7de;
+            width: 100%;
+            box-sizing: border-box;
+            font-size: 1em;
+            margin-top: 4px;
+        }
+        button {
+            background: #0077ff;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            padding: 10px 24px;
+            font-size: 1em;
+            cursor: pointer;
+            margin-top: 12px;
+            transition: background 0.2s;
+        }
+        button:hover {
+            background: #005fcc;
+        }
+        .results {
+            margin-top: 32px;
+            background: #f0f4f8;
+            border-radius: 8px;
+            padding: 20px;
+        }
+        .results h2 {
+            color: #0077ff;
+            margin-top: 0;
+        }
+        .results p {
+            font-size: 1.08em;
+            margin: 10px 0;
+        }
+        hr {
+            border: none;
+            border-top: 1px solid #e1e4e8;
+            margin: 24px 0;
+        }
+        .formula-block {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 18px 0 10px 0;
+        }
+        .formula-main {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            font-size: 1.35em;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 1px 6px rgba(0,0,0,0.07);
+            padding: 10px 18px;
+            color: #0077ff;
+            font-weight: 500;
+        }
+        .formula-frac {
+            display: inline-block;
+            vertical-align: middle;
+            text-align: center;
+        }
+        .formula-num {
+            display: block;
+            font-size: 1.1em;
+            margin-bottom: 2px;
+        }
+        .formula-bar {
+            display: block;
+            border-top: 2px solid #0077ff;
+            margin: 2px 0 2px 0;
+        }
+        .formula-den {
+            display: block;
+            font-size: 1.1em;
+        }
+        .formula-where {
+            font-weight: bold;
+            margin-top: 8px;
+            color: #34495e;
+        }
+    </style>
+    <script>
+    // Format input fields with commas for currency
+    document.addEventListener('DOMContentLoaded', function() {
+        function formatNumberWithCommas(val) {
+            val = val.replace(/,/g, '');
+            if (val === '') return '';
+            let parts = val.split('.');
+            parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+            return parts.length > 1 ? parts[0] + '.' + parts[1] : parts[0];
+        }
+        function stripCommas(val) {
+            return val.replace(/,/g, '');
+        }
+        const currencyInputs = [
+            'income', 'ownerSalary', 'price', 'downPayment'
+        ];
+        currencyInputs.forEach(function(name) {
+            var input = document.querySelector('input[name="' + name + '"]');
+            if (input) {
+                // Only format on blur (when leaving the field)
+                input.addEventListener('blur', function(e) {
+                    let raw = stripCommas(input.value);
+                    if (raw === '') return;
+                    input.value = formatNumberWithCommas(raw);
+                });
+                // On focus, strip commas for easy editing
+                input.addEventListener('focus', function(e) {
+                    input.value = stripCommas(input.value);
+                });
+                // On form submit, strip commas so server gets raw number
+                input.form.addEventListener('submit', function() {
+                    input.value = stripCommas(input.value);
+                });
+            }
+        });
+    });
+    </script>
+</head>
+<body>
+    <nav style="background:#0077ff;padding:12px 0 10px 0;text-align:center;">
+        <a href="/" style="color:#fff;font-weight:bold;text-decoration:none;padding:0 18px;">Business Loan Calculator</a>
+        <a href="/mortgage" style="color:#fff;font-weight:bold;text-decoration:none;padding:0 18px;">Mortgage Calculator</a>
+    </nav>
+    <div class="container">
+        <h1>Business Loan Calculator</h1>
+        <div style="background:#eaf6ff;border-radius:8px;padding:16px 18px;margin-bottom:24px;font-size:0.98em;">
+            <strong>How are payments calculated?</strong><br>
+            <span style="color:#34495e;">
+                The monthly payment for an amortizing loan is calculated using:
+                <div class="formula-block">
+                    <span class="formula-main">P = <span class="formula-frac"><span class="formula-num">L × r</span><span class="formula-bar"></span><span class="formula-den">1 - (1 + r)<sup>-n</sup></span></span></span>
+                </div>
+                <div class="formula-where">where:</div>
+                <ul style="margin:8px 0 0 18px;">
+                    <li><b>P</b> = monthly payment</li>
+                    <li><b>L</b> = loan amount (Business Price minus Down Payment)</li>
+                    <li><b>r</b> = monthly interest rate (annual rate ÷ 12 ÷ 100)</li>
+                    <li><b>n</b> = total number of payments (years × 12)</li>
+                </ul>
+                <div style="margin-top:8px;">If the interest rate is 0%, the payment is simply <span style="font-family:monospace;">L / n</span>.</div>
+            </span>
+        </div>
+        <form action="/" method="post">
+            <label>Discrentionary Income (EBITDA):
+                <input type="text" inputmode="numeric" name="income" required value="{{if .IncomeStr}}{{.IncomeStr}}{{end}}">
+            </label>
+            <label>Owner Salary / Distributions:
+                <input type="text" inputmode="numeric" name="ownerSalary" required value="{{if .OwnerSalaryStr}}{{.OwnerSalaryStr}}{{end}}">
+            </label>
+            <label>Business Price:
+                <input type="text" inputmode="numeric" name="price" required value="{{if .PriceStr}}{{.PriceStr}}{{end}}">
+            </label>
+            <label>Down Payment:
+                <input type="text" inputmode="numeric" name="downPayment" required value="{{if .DownPaymentStr}}{{.DownPaymentStr}}{{end}}">
+            </label>
+            <label>Loan Term (years):
+                <input type="number" name="years" required value="{{if .Years}}{{.Years}}{{end}}">
+            </label>
+            <label>Interest Rate (%):
+                <input type="text" inputmode="decimal" name="rate" required value="{{if .RateStr}}{{.RateStr}}{{end}}">
+            </label>
+            <button type="submit" style="margin-top:18px;">Calculate</button>
+        </form>
+        {{if .MonthlyPayment}}
+        <div class="results">
+            <h2>Results</h2>
+            <p><b>Discretionary Income (EBITDA):</b> {{formatUSD .Income}}</p>
+            <p><b>Owner Salary / Distributions:</b> {{formatUSD .OwnerSalary}}</p>
+            <p><b>Business Price:</b> {{formatUSD .Price}}</p>
+            <p><b>Down Payment:</b> {{formatUSD .DownPayment}}</p>
+            <p><b>Loan Amount:</b> {{formatUSD .LoanAmount}}</p>
+            <p><b>Loan Term:</b> {{.Years}} years</p>
+            <p><b>Interest Rate:</b> {{.Rate}}%</p>
+            <hr>
+            <p><b>Monthly Loan Payment:</b> {{formatUSD .MonthlyPayment}}</p>
+            <p><b>Total Paid Per Year:</b> {{formatUSD .TotalPaidPerYear}}</p>
+            <p><b>Total Loan Payments:</b> {{formatUSD .TotalLoanPayments}}</p>
+            <p><b>Profit After Loan Payments:</b> {{formatUSD .LeftAfterLoan}}</p>
+            <hr>
+            <p><b>Cash Flow after Owner Salary:</b> {{formatUSD .Income}} - {{formatUSD .OwnerSalary}} = <b>{{formatUSD .LeftAfterOwner}}</b></p>
+            <p><b>Debt Service Coverage Ratio (DSCR):</b> {{printf "%.2f" .EarningsRate}}
+                {{if ge .EarningsRate 1.25}}
+                    <span style="color:green;font-weight:bold;">(Meets SBA minimum)</span>
+                {{else}}
+                    <span style="color:red;font-weight:bold;">(Below SBA minimum)</span>
+                {{end}}
+            </p>
+            <hr>
+            <div style="margin-bottom:10px;">
+                <b>What is Debt Service Coverage Ratio (DSCR)?</b><br>
+                <span style="color:#34495e;font-size:0.98em;">
+                    In the context of a business acquisition, <b>debt service coverage ratio (DSCR)</b> is a metric used to determine how comfortably a business can make its annual SBA 7(a) loan payment. The higher a business' DSCR, the more money it has left over after making its payments. The money over and above debt service can be used to re-invest into the business and provide for the owners compensation and benefits.<br><br>
+                    The DSCR is important because it helps lenders understand the level of risk associated with the loan. It should also be considered by a potential business owner as it is an indication of how risky purchasing the business may be. If the DSCR is low, it means the business may not be able to cover its loan payments if profits decline, in a recession for instance. This is why the SBA has set a minimum DSCR for all loans.
+                </span>
+            </div>
+            <div style="background:#f7faff;border-radius:8px;padding:12px 16px;margin-bottom:16px;">
+                <b>DSCR Formula:</b><br>
+                <span style="font-family:monospace;font-size:1.08em;">DSCR = (Cash Flow after Owner Salary) / Annual Loan Payment</span><br>
+                <span style="color:#34495e;font-size:0.97em;">Where:<br>
+                &nbsp;&nbsp;Cash Flow after Owner Salary = Discretionary Income (EBITDA) - Owner Salary / Distributions<br>
+                &nbsp;&nbsp;Annual Loan Payment = Monthly Loan Payment × 12<br>
+                </span>
+                <div style="margin-top:8px;color:#34495e;font-size:0.97em;">
+                    <b>Example:</b><br>
+                    If Cash Flow after Owner Salary is <b>$600,000</b> and Annual Loan Payment is <b>$400,000</b>:<br>
+                    DSCR = $600,000 / $400,000 = <b>1.50</b> (Meets SBA minimum by 0.25)
+                </div>
+            </div>
+            <hr>
+            <div style="font-size:0.97em;color:#34495e;margin-top:10px;">
+                <b>Key:</b><br>
+                <ul style="margin:8px 0 0 18px;">
+                    <li><b>Monthly Loan Payment</b>: Amount paid each month for the business loan</li>
+                    <li><b>Total Paid Per Year</b>: Total business loan payments made in one year</li>
+                    <li><b>Total Loan Payments</b>: Total paid over the life of the business loan</li>
+                    <li><b>Annual Income Left After Loan Payments</b>: Your annual income minus yearly business loan payments</li>
+                    <li><b>Debt Service Coverage Ratio (DSCR)</b>: Annual income divided by annual business loan payments (should be at least 1.25)</li>
+                </ul>
+            </div>
+        </div>
+        {{end}}
+    </div>
+</body>
+</html>
