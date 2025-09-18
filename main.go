@@ -35,7 +35,9 @@ var mortgageTmpl = template.Must(template.New("mortgage.html").Funcs(template.Fu
 func main() {
 	http.HandleFunc("/", indexHandler)
 	http.HandleFunc("/mortgage", mortgageHandler)
-	http.ListenAndServe(":8080", nil)
+	if err := http.ListenAndServe(":8080", nil); err != nil {
+		fmt.Println("Server error:", err)
+	}
 }
 
 func mortgageHandler(w http.ResponseWriter, r *http.Request) {
@@ -68,7 +70,9 @@ func mortgageHandler(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 	}
-	mortgageTmpl.Execute(w, data)
+	if err := mortgageTmpl.Execute(w, data); err != nil {
+		http.Error(w, "Template error: "+err.Error(), http.StatusInternalServerError)
+	}
 
 }
 
@@ -126,5 +130,7 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 	}
-	indexTmpl.Execute(w, data)
+	if err := indexTmpl.Execute(w, data); err != nil {
+		http.Error(w, "Template error: "+err.Error(), http.StatusInternalServerError)
+	}
 }
