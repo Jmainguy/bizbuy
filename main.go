@@ -1,12 +1,16 @@
 package main
 
 import (
+	"embed"
 	"fmt"
 	"html/template"
 	"math"
 	"net/http"
 	"strconv"
 )
+
+//go:embed templates/*.html
+var templateFiles embed.FS
 
 func formatUSD(n float64) string {
 	return fmt.Sprintf("$%s", commaFmt(n))
@@ -26,11 +30,11 @@ func commaFmt(n float64) string {
 
 var indexTmpl = template.Must(template.New("index.html").Funcs(template.FuncMap{
 	"formatUSD": formatUSD,
-}).ParseFiles("templates/index.html"))
+}).ParseFS(templateFiles, "templates/index.html"))
 
 var mortgageTmpl = template.Must(template.New("mortgage.html").Funcs(template.FuncMap{
 	"formatUSD": formatUSD,
-}).ParseFiles("templates/mortgage.html"))
+}).ParseFS(templateFiles, "templates/mortgage.html"))
 
 func main() {
 	http.HandleFunc("/", indexHandler)

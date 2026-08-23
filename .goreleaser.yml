@@ -1,0 +1,63 @@
+version: 2
+
+builds:
+  - id: bizbuy
+    main: .
+    binary: bizbuy
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+    goarch:
+      - amd64
+      - arm64
+
+checksum:
+  name_template: checksums.txt
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - '^docs:'
+      - '^test:'
+
+kos:
+  - main: .
+    working_dir: .
+    base_image: cgr.dev/chainguard/static@sha256:f68e3a8244c7d0f4cd56635aaff8e6a533cf6cc3850d8fb339567a5782d6a0b0
+    repositories:
+      - zot.soh.re/jmainguy
+    platforms:
+      - linux/amd64
+      - linux/arm64
+    tags:
+      - latest
+      - "{{.Tag}}"
+    creation_time: "{{.CommitTimestamp}}"
+    sbom: none
+    labels:
+      org.opencontainers.image.created: "{{.Date}}"
+      org.opencontainers.image.title: Bizbuy
+      org.opencontainers.image.revision: "{{.FullCommit}}"
+      org.opencontainers.image.version: "{{.Version}}"
+      org.opencontainers.image.authors: "Jonathan Seth Mainguy <jon@soh.re>"
+      org.opencontainers.image.vendor: Jmainguy
+      org.opencontainers.image.url: "https://github.com/jmainguy/bizbuy"
+      org.opencontainers.image.source: "https://github.com/jmainguy/bizbuy"
+      org.opencontainers.image.description: "Business loan, DSCR, and mortgage calculator"
+      org.opencontainers.image.licenses: GPL-2.0-only
+    annotations:
+      org.opencontainers.image.created: "{{.Date}}"
+      org.opencontainers.image.title: Bizbuy
+      org.opencontainers.image.revision: "{{.FullCommit}}"
+      org.opencontainers.image.version: "{{.Version}}"
+      org.opencontainers.image.authors: "Jonathan Seth Mainguy <jon@soh.re>"
+      org.opencontainers.image.vendor: Jmainguy
+      org.opencontainers.image.url: "https://github.com/jmainguy/bizbuy"
+      org.opencontainers.image.source: "https://github.com/jmainguy/bizbuy"
+      org.opencontainers.image.description: "Business loan, DSCR, and mortgage calculator"
+      org.opencontainers.image.licenses: GPL-2.0-only
+    bare: true
+    preserve_import_paths: false
+    base_import_paths: true
